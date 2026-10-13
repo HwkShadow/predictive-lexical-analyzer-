@@ -1,0 +1,82 @@
+mkdir -p bin
+cc -std=c11 -Wall -Wextra -Wpedantic -O2 -Isrc -c src/input_buffer.c -o src/input_buffer.o
+cc -std=c11 -Wall -Wextra -Wpedantic -O2 -Isrc -c src/predictor.c -o src/predictor.o
+cc -std=c11 -Wall -Wextra -Wpedantic -O2 -Isrc -c src/spill_buffer.c -o src/spill_buffer.o
+cc -std=c11 -Wall -Wextra -Wpedantic -O2 -Isrc -c src/lexer.c -o src/lexer.o
+cc -std=c11 -Wall -Wextra -Wpedantic -O2 -Isrc -c src/statistics.c -o src/statistics.o
+cc -std=c11 -Wall -Wextra -Wpedantic -O2 -Isrc -c src/report.c -o src/report.o
+cc -std=c11 -Wall -Wextra -Wpedantic -O2 -Isrc tests/test_runner.c tests/unit/test_input_buffer.c tests/unit/test_predictor.c tests/unit/test_spill_buffer.c tests/unit/test_lexer.c tests/integration/test_boundary_conditions.c tests/integration/test_comparison.c tests/integration/test_regression.c src/input_buffer.o src/predictor.o src/spill_buffer.o src/lexer.o src/statistics.o src/report.o -o bin/test_runner -lm -lrt
+bin/test_runner
+======================================================================
+  PLSB LEXER - MASTER COMPREHENSIVE TEST SUITE RUNNER
+======================================================================
+
+[TEST] Running Unit Tests: Input Buffer...
+  Results: 24/24 tests passed (0 failures)
+
+[TEST] Running Unit Tests: Predictor & Markov Modeling...
+  Results: 12/12 tests passed (0 failures)
+
+[TEST] Running Unit Tests: Spill Buffer...
+  Results: 20/20 tests passed (0 failures)
+
+[TEST] Running Unit Tests: Lexer Rules & C Syntax...
+  Results: 25/25 tests passed (0 failures)
+
+[TEST] Running Integration Tests: Boundary Conditions & Buffer Refills...
+  Results: 25/25 tests passed (0 failures)
+
+[TEST] Running Integration Tests: Equivalence Verification (Baseline vs PLSB)...
+  Results: 16/16 tests passed (0 failures)
+
+======================================================================
+  PLSB LEXER - PERMANENT REGRESSION & HARDENING TEST SUITE
+======================================================================
+
+  [CASE 1] Reported defect 1: 'x ..a' with buffer size 4...
+    -> PASS
+  [CASE 2] Dot sequences (., .., ..., ...., ..a) across buffer sizes 1..16 and offsets...
+    -> PASS
+  [CASE 3] Multi-char operators matching and non-matching lookahead across boundaries...
+    -> PASS
+  [CASE 4] Non-matching operator lookaheads (e.g. '=x', '+y', '<z', '- ') across boundaries...
+    -> PASS
+  [CASE 5] EOF immediately after single and multi-character operators...
+    -> PASS
+  [CASE 6] Number literals with dots and ranges (.5, 123.456, 1..5, 0..)...
+    -> PASS
+  [CASE 7] Tokens spanning multiple buffer refills (length 500 in buffer size 4)...
+    -> PASS
+  [CASE 8] Injected allocation failures: initial spill alloc, growth realloc, normal token alloc...
+    -> PASS
+  [CASE 9] Arithmetic overflow guards in spill_buffer and input_buffer...
+    -> PASS
+  [CASE 10] I/O error propagation and cleanup on lookahead/refills...
+    -> PASS
+  [CASE 11] Token array allocation failure safety, overflow guards, and leak-free cleanup...
+    -> PASS
+
+----------------------------------------------------------------------
+Regression Suite Summary:
+  Test Cases:  11 passed, 0 failed (Total 11 cases)
+  Assertions:  1739 passed, 0 failed (Total 1739 checks)
+======================================================================
+
+=== RUNNING FIXTURE TESTS ===
+  [PASS] Open tests/fixtures/empty.c
+  [PASS] Empty file yields TOKEN_EOF immediately
+  [PASS] Open tests/fixtures/whitespace_only.c
+  [PASS] Whitespace file yields TOKEN_EOF after skipping spaces/newlines
+  [PASS] sample_c.c: Token counts identical between Baseline and PLSB
+  [PASS] sample_c.c: All emitted tokens 100% identical
+  [PASS] sample_c.c: Refill count identical (PLSB does not distort buffer refills)
+  [PASS] sample_c.c: Lexeme spill event counts identical
+  [PASS] stress_long_tokens.c parsed completely
+  [PASS] Stress file triggered lexeme spill events as intended
+  [PASS] Stress file triggered PLSB predictions
+
+======================================================================
+MASTER TEST SUITE SUMMARY:
+  Fixture Checks:  11 Passed, 0 Failed (Total 11 checks)
+  Suites Status:   ALL 8 SUITES PASSED (0 suites failed)
+======================================================================

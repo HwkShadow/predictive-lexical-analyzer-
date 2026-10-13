@@ -1,0 +1,2 @@
+mkdir -p bin
+cc -std=c11 -Wall -Wextra -Wpedantic -O2 -Isrc benchmarks/benchmark_runner.c src/input_buffer.o src/predictor.o src/spill_buffer.o src/lexer.o src/statistics.o src/report.o -o bin/benchmark_runner -lm -lrt
